@@ -5,9 +5,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody playerRB;
+    private Animator playerAnim;
 
     public float speed = 5;
-    public float boostSpeed = 12;
+    public float sprintSpeed = 12;
     public float jumpForce;
     public float gravityModifier;
 
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         playerRB = GetComponent<Rigidbody>();
+        playerAnim = GetComponent<Animator>();
         Physics.gravity *= gravityModifier;
     }
 
@@ -30,7 +32,8 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundChecker.position, groundDistance, ground);
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            playerRB.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+            playerAnim.SetTrigger("Jump_trig");
         }
     }
 
@@ -46,14 +49,24 @@ public class PlayerController : MonoBehaviour
 
         transform.Translate(Vector3.right * xMovement);
         transform.Translate(Vector3.forward * zMovement);
+        if (xMovement != 0 || zMovement != 0)
+        {
+            playerAnim.SetBool("Walk", true);
+        }
+        else if (xMovement == 0 || zMovement == 0)
+        {
+            playerAnim.SetBool("Walk", false);
+        }
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            speed = boostSpeed;
+            speed = sprintSpeed;
+            playerAnim.SetBool("Run", true);
         }
         else
         {
             speed = 5;
+            playerAnim.SetBool("Run", false);
         }
     }
 }
