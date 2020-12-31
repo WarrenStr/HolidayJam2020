@@ -7,8 +7,8 @@ public class PlayerController : MonoBehaviour
     private Rigidbody playerRB;
     private Animator playerAnim;
 
-    public float speed = 5;
-    public float sprintSpeed = 12;
+    public float speed = 1;
+    public float sprintSpeed = 5;
     public float jumpForce;
     public float gravityModifier;
 
@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            speed = 5;
+            speed = .3f;
             playerAnim.SetBool("Run", false);
         }
     }
