@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+// This script is a mess. Sorry to anyone who reads it.
+
+
 public class SpawnManager : MonoBehaviour
 {
     public GameObject[] presentPrefabs;
@@ -15,13 +18,14 @@ public class SpawnManager : MonoBehaviour
     public int presentCount = 0;
     public int presentsCollected;
 
-    private bool presentsAreReturned;
+    private bool treeTrigger;
+    public bool treeIsRestored = false;
 
     // Start is called before the first frame update
     void Start()
     {
         
-        SpawnPresents(roundCount);
+        SpawnPresents(1);
         RoundManager();
 
         presentReturnText.GetComponent<TextMeshProUGUI>().enabled = false;
@@ -32,21 +36,25 @@ public class SpawnManager : MonoBehaviour
     void Update()
     {
         presentCount = FindObjectsOfType<Present>().Length;
-        presentsAreReturned = GameObject.Find("Christmas Tree").GetComponent<TreeTrigger>().isNearTree;
-        presentCounter.text = "Presents: " + presentsCollected + " /" + roundCount;
+        treeTrigger = GameObject.Find("Christmas Tree").GetComponent<TreeTrigger>().isNearTree;
+        presentCounter.text = "Branches: " + presentsCollected;
 
-        if (presentsAreReturned && (presentCount == 0))
+        if (treeTrigger && (presentCount == 0))
         {
-            presentReturnText.GetComponent<TextMeshProUGUI>().enabled = true;
+            if (!treeIsRestored)
+            {
+                presentReturnText.GetComponent<TextMeshProUGUI>().enabled = true;
+            }
+            
             if (Input.GetKeyDown(KeyCode.F))
             {
                 AddBranchesToTree();
                 RoundManager();
-                
+                treeIsRestored = true;
             }
         }
 
-        else if (!presentsAreReturned)
+        else if (!treeTrigger)
         {
             presentReturnText.GetComponent<TextMeshProUGUI>().enabled = false;
         }
@@ -64,21 +72,21 @@ public class SpawnManager : MonoBehaviour
 
     void AddBranchesToTree()
     {
-        for(int i = 0; i < presentsCollected; i++)
+        
+        for (int i = 0; i < treeBranches.Length; i++)
         {
             treeBranches[i].SetActive(true);
-            
         }
-        
+        return;
         /*Random.Range(1, treeBranches.Length)*/;
-        
+
     }
 
     // random spawn position generator
     private Vector3 GenerateSpawnPosition()
     {
-        float spawnPosX = Random.Range(0, 4);
-        float spawnPosZ = Random.Range(-8, 0);
+        float spawnPosX = Random.Range(0, 3.5f);
+        float spawnPosZ = Random.Range(-4, 0);
 
         Vector3 randomSpawn = new Vector3(spawnPosX, .16f, spawnPosZ);
 
@@ -88,10 +96,10 @@ public class SpawnManager : MonoBehaviour
     void RoundManager()
     {
         roundCount++;
-        SpawnPresents(roundCount);
+        //SpawnPresents(1);
         
         presentsCollected = 0;
-        presentsAreReturned = false;
+        treeTrigger = false;
         presentReturnText.GetComponent<TextMeshProUGUI>().enabled = false;
     }
 }

@@ -18,12 +18,15 @@ public class PlayerController : MonoBehaviour
     
     public bool isGrounded;
 
+    float initialSpeed;
+
     // Start is called before the first frame update
     void Start()
     {
         playerRB = GetComponent<Rigidbody>();
         playerAnim = GetComponent<Animator>();
         Physics.gravity *= gravityModifier;
+        initialSpeed = speed;
     }
 
     // Update is called once per frame
@@ -65,7 +68,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            speed = .3f;
+            speed = initialSpeed;
             playerAnim.SetBool("Run", false);
         }
     }

@@ -13,11 +13,19 @@ public class CatController : MonoBehaviour
 
     public Light spotlight;
     public float viewDistance;
+    public LayerMask viewMask;
     float viewAngle;
+
+    public Transform player;
+
+    Color originalSpotlightColor;
+    public Material eyes;
 
     void Start()
     {
         viewAngle = spotlight.spotAngle;
+        originalSpotlightColor = spotlight.color;
+        eyes.SetColor("_EmissionColor", spotlight.color);
 
         Vector3[] waypoints = new Vector3[pathHolder.childCount];
         for (int i = 0; i<waypoints.Length; i++)
@@ -27,22 +35,54 @@ public class CatController : MonoBehaviour
 
         StartCoroutine(FollowPath(waypoints));
     }
+
+    private void Update()
+    {
+        if (CanSeePlayer())
+        {
+            spotlight.color = Color.red;
+            eyes.SetColor("_EmissionColor", Color.red);
+        }
+        else
+        {
+            spotlight.color = originalSpotlightColor;
+            eyes.SetColor("_EmissionColor", originalSpotlightColor);
+        }
+    }
+
+    bool CanSeePlayer()
+    {
+        if (Vector3.Distance(transform.position, player.position) < viewDistance)
+        {
+            Vector3 dirToPlayer = (player.position - transform.position).normalized;
+            float angleBetweenGuardAndPlayer = Vector3.Angle(transform.forward, dirToPlayer);
+
+            if (angleBetweenGuardAndPlayer < viewAngle / 2)
+            {
+                if(!Physics.Linecast(transform.position, player.position, viewMask))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     
 
     IEnumerator FollowPath(Vector3[] waypoints)
     {
         transform.position = waypoints[0];
 
-        int targetWaypointIndex = 1;
+        int targetWaypointIndex = Random.Range(0, waypoints.Length);
         Vector3 targetWaypoint = waypoints[targetWaypointIndex];
         transform.LookAt(targetWaypoint);
 
         while (true)
         {
             transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, speed * Time.deltaTime);
-            if(transform.position == targetWaypoint)
+            if(transform.position == targetWaypoint  )
             {
-                targetWaypointIndex = (targetWaypointIndex+1) % waypoints.Length;
+                targetWaypointIndex = (Random.Range(0,waypoints.Length)) % waypoints.Length;
                 targetWaypoint = waypoints[targetWaypointIndex];
                 yield return new WaitForSeconds(waitTime);
                 yield return StartCoroutine(TurnToFace(targetWaypoint));
